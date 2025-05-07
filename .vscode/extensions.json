@@ -1,7 +1,7 @@
 {
     "recommendations": [
         "visualstudioexptteam.vscodeintellicode",
-        "ms-toolsai.jupyter",
-        "ms-python.python"
+        "ms-python.python",
+        "ms-azuretools.vscode-containers"
     ]
 }
