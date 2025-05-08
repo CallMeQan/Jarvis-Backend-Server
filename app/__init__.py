@@ -2,7 +2,7 @@
 from os import getenv
 from flask import Flask
 
-from .routes.auth import auth_bp
+from .routes import auth_bp, chatbot_bp
 
 from .config import Config
 from .extensions import db
@@ -23,6 +23,7 @@ def create_app_with_blueprint():
     # ======================
 
     app.register_blueprint(auth_bp, url_prefix="/auth")
+    app.register_blueprint(chatbot_bp, url_prefix="/chatbot")
 
     # ======================
     # |    Final stuff     |
