@@ -1,11 +1,13 @@
-from flask import Blueprint, request, render_template, redirect, url_for, flash, session, jsonify
-from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, get_jwt, create_refresh_token
+from flask import Blueprint, request, session, jsonify
+from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, create_refresh_token
+from flask_mail import Message
 from werkzeug.security import generate_password_hash, check_password_hash
 import hmac, hashlib, datetime
 from os import getenv
+import datetime
 
 from ..models import User, ForgotPassword, WrongPassword
-from ..extensions import db
+from ..extensions import db, jwt, mail
 
 auth_bp = Blueprint('auth', __name__)
 
@@ -23,31 +25,76 @@ def generate_email_hash(email: str) -> str:
 
 # Register account
 @auth_bp.route("/register", methods=["POST"])
-def register():
+def register(): 
+    """
+    Register function. All fields are required. 
+    check if username or email is duplicated.
+    If not, create a new user and return a success message.
+    """
     data = request.json
     username = data.get("username")
+    name = data.get("name")
     email = data.get("email")
     password = data.get("password")
-    name = data.get("name")
+    retype_password = data.get("retype_password")
 
-    if not all([username, email, password, name]):
+    if not all([username, name, email, password, retype_password]):
         return jsonify({"msg": "Missing fields"}), 400
-
+    if password != retype_password:
+        return jsonify({"msg": "Passwords do not match"}), 400
     if User.is_duplicated(username, email):
         return jsonify({"msg": "Username or email already exists"}), 400
 
     hashed_password = generate_password_hash(password)
-    new_user = User(username=username, email=email, password=hashed_password, name=name)
+    verify_token = generate_email_hash(email + str(datetime.datetime.now()))
+    
+    new_user = User(username=username, 
+                    name=name, 
+                    email=email, 
+                    password=hashed_password,
+                    email_verify_token=verify_token,
+                    is_verified=False)
+    
     db.session.add(new_user)
     db.session.commit()
+    
+    verify_link = f"http://localhost:5000/auth/register/verify-email?token={verify_token}"
+    msg = Message(
+        subject="Verify your email",
+        recipients=[email],
+        body=f"Please click the link to verify your email: {verify_link}"
+    )
+    mail.send(msg)
+    
+    access_token = create_access_token(identity=new_user.user_id)
 
-    return jsonify({"msg": "User created"}), 201
+    return jsonify({
+        "msg": "User registered successfully. Please verify your email.",
+        "access_token": access_token
+    }), 201
+
+@auth_bp.route("/register/verify-email", methods=["GET"])
+def verify_email():
+    token = request.args.get("token")
+    if not token:
+        return jsonify({"msg": "Missing token"}), 400
+
+    user = User.query.filter_by(email_verify_token=token).first()
+    if not user:
+        return jsonify({"msg": "Invalid or expired token"}), 400
+
+    user.is_verified = True
+    user.email_verify_token = None
+    db.session.commit()
+
+    return jsonify({"msg": "Email verified successfully!"})
 
 # Log in
 @auth_bp.route("/login", methods = ["POST"])
 def login():
     """
     Log in function.
+    Create a JWT token for the user.
     """
     data = request.json
     email = data.get("email")
@@ -65,6 +112,9 @@ def login():
 @auth_bp.route("/profile", methods = ["GET"])
 @jwt_required()
 def profile():
+    """
+    Get user profile.
+    """
     user_id = get_jwt_identity()
     user = User.query.get(user_id)
     return jsonify({
@@ -74,8 +124,6 @@ def profile():
         "name": user.name,
         "create_at": user.created_at
     })
-
-@auth_bp.route("/register/verify-email", methods = ["GET"])
 
 # tái tạo token
 @auth_bp.route("/refresh", methods = ["POST"])
