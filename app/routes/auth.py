@@ -1,8 +1,9 @@
 from flask import Blueprint, request, render_template, redirect, url_for, flash, session, jsonify
-from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
+from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, get_jwt, create_refresh_token
 from werkzeug.security import generate_password_hash, check_password_hash
 import hmac, hashlib, datetime
 from os import getenv
+
 from ..models import User, ForgotPassword, WrongPassword
 from ..extensions import db
 
@@ -35,13 +36,12 @@ def register():
     if User.is_duplicated(username, email):
         return jsonify({"msg": "Username or email already exists"}), 400
 
-    hashed_pw = generate_password_hash(password)
-    new_user = User(username=username, email=email, password=hashed_pw, name=name)
+    hashed_password = generate_password_hash(password)
+    new_user = User(username=username, email=email, password=hashed_password, name=name)
     db.session.add(new_user)
     db.session.commit()
 
-    access_token = create_access_token(identity=new_user.user_id)
-    return jsonify({"msg": "User created", "access_token": access_token}), 201
+    return jsonify({"msg": "User created"}), 201
 
 # Log in
 @auth_bp.route("/login", methods = ["POST"])
@@ -50,18 +50,18 @@ def login():
     Log in function.
     """
     data = request.json
-    username = data.get("username")
     email = data.get("email")
     password = data.get("password")
 
-    user = User.query.filter_by(username=username).first()
-
+    user = User.query.filter_by(email=email).first()
     if not user or not check_password_hash(user.password, password):
         return jsonify({"msg": "Invalid credentials"}), 401
 
     access_token = create_access_token(identity=user.user_id)
-    return jsonify(access_token=access_token)
+    refresh_token = create_refresh_token(identity=user.user_id)
+    return jsonify(access_token=access_token, refresh_token=refresh_token)
 
+# lấy dữ liệu người dùng 
 @auth_bp.route("/profile", methods = ["GET"])
 @jwt_required()
 def profile():
@@ -76,6 +76,14 @@ def profile():
     })
 
 @auth_bp.route("/register/verify-email", methods = ["GET"])
+
+# tái tạo token
+@auth_bp.route("/refresh", methods = ["POST"])
+@jwt_required(refresh = True)
+def refresh():
+    identity = get_jwt_identity()
+    access_token = create_access_token(identity=identity)
+    return jsonify(access_token=access_token)
 
 @auth_bp.route("/forgot-password", methods=["POST"])
 def forgot_password():
