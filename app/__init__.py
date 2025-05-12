@@ -5,7 +5,16 @@ from flask import Flask
 from .routes.auth import auth_bp
 
 from .config import Config
-from .extensions import db
+from .extensions import db, bcrypt # thêm bcrypt
+
+
+######
+from flask_sqlalchemy import SQLAlchemy
+from flask_bcrypt import Bcrypt
+
+db = SQLAlchemy()
+bcrypt = Bcrypt()
+####
 
 def create_app_with_blueprint():
     # ======================
@@ -17,6 +26,7 @@ def create_app_with_blueprint():
 
     # Initialize extensions
     db.init_app(app)
+    bcrypt.init_app(app) # thêm bcrypt
 
     # ======================
     # |     Routing        |
