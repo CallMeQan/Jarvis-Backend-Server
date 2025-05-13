@@ -148,7 +148,6 @@ def forgot_password():
     hash_token = generate_email_hash(email + str(timestamp))
 
     # Lưu token
-    from ..extensions import db
     forgot = ForgotPassword(email=email, hashed_timestamp=hash_token, created_at=timestamp)
     db.session.add(forgot)
     db.session.commit()
