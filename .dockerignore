@@ -1,0 +1,15 @@
+# This file is used to specify files and directories that should be ignored by Docker when building images.
+# It is similar to .gitignore but specifically for Docker.
+venv/
+.gitignore
+.git
+
+# Ignore Python cache files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Other common ignores
+tests/
+*.log
