@@ -1,6 +1,8 @@
 flask==3.1.0
 flask-login==0.6.3
 flask-sqlalchemy==3.1.1
+Flask-JWT-Extended==4.7.1
+Flask-Mail==0.10.0
 
 llama-cpp-python==0.3.8
 llama-cpp-agent==0.2.35
