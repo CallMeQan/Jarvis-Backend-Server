@@ -1,5 +1,4 @@
 # app.py
-from os import getenv
 from flask import Flask
 
 from .routes import auth_bp, chatbot_bp
