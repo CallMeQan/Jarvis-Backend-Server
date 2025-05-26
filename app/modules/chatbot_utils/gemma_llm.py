@@ -1,4 +1,5 @@
 # Importing required libraries
+import os
 from typing import List, Tuple
 from llama_cpp import Llama
 from llama_cpp_agent import LlamaCppAgent
@@ -61,6 +62,10 @@ def respond(
         str: The response to the message.
     """
     try:
+        pass
+    except:
+        pass
+    if True:
         # Load the global variables
         global llm
         global llm_model
@@ -72,7 +77,9 @@ def respond(
         # Load the model
         if llm is None or llm_model != model:
             # Check if model file exists
-            model_path = f".../llm_models/{model}"
+            # model_path = f".../llm_models/{model}"
+            model_path = os.path.join("app/llm_models", model)
+            model_path = os.path.abspath(model_path)
             
             # if not os.path.exists(model_path):
             #     yield f"Error: Model file not found at {model_path}. Please check your model path."
@@ -147,8 +154,8 @@ def respond(
             return _streaming()
 
     # Handle exceptions that may occur during the process
-    except Exception as e:
-        raise Exception(f"An error occurred: {str(e)}") from e
+    # except Exception as e:
+    #     raise Exception(f"An error occurred: {str(e)}") from e
 
 if __name__ == "__main__":
     # Original history

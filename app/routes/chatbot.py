@@ -16,11 +16,20 @@ def gemma3():
         # TODO: Check authentication
 
         # Get data
-        message = request.form.get("message")
-        history = request.form.get("history")
+        data = request.get_json()
+        message = data.get("message")
+        # history = request.form.get("history")
+        history = []
 
         # Models
         answer = respond(message = message, history = history, model = "gemma-3-1b-it-Q8_0.gguf")
+        print("\n\n\n\n\n\n\n\n\n\n\n")
+        print(f"fus message: {message}")
+        print(f"answer: {answer}")
+        print("\n\n\n\n\n\n\n\n\n\n\n")
 
-        return jsonify({"answer": answer}), 200
+        return jsonify({
+            "message": answer,
+            "role": "assistant",
+            }), 200
     return jsonify({"error": "Wrong method! This URL is only for POST method"}), 404
