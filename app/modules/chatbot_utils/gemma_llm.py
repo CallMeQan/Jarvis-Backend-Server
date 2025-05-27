@@ -8,6 +8,8 @@ from llama_cpp_agent.chat_history import BasicChatHistory
 from llama_cpp_agent.chat_history.messages import Roles
 from llama_cpp_agent.messages_formatter import MessagesFormatter, PromptMarkers
 
+from .prompts import original_prompt
+
 # Define the prompt markers for Gemma 3
 model = "gemma-3-1b-it-Q8_0.gguf"
 gemma_3_prompt_markers = {
@@ -35,7 +37,7 @@ def respond(
     message: str,
     history: List[Tuple[str, str]],
     model: str = "gemma-3-1b-it-Q8_0.gguf",
-    system_message: str = "You are a helpful mobile assistant called Quan.",
+    system_message: str = original_prompt,
     max_tokens: int = 1024,
     temperature: float = 0.7,
     
@@ -123,7 +125,7 @@ def respond(
             assistant = {"role": Roles.assistant, "content": msn[1]}
             messages.add_message(user)
             messages.add_message(assistant)
-        current_message = {"role": Roles.assistant, "content": message}
+        current_message = {"role": Roles.user, "content": message}
         messages.add_message(current_message)
 
         if not stream:
