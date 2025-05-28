@@ -29,7 +29,7 @@ def lookup_weather(place: str = "Binh Duong", region: str = "vn-vi"):
     A function to search for today's weather.
 
     :place: the place we need to look up the weather
-    :region: region for the search (au-en, ca-en, vn-vi, cn-zh, etc.)
+    :region: region for the search (uk-en, au-en, ca-en, vn-vi, cn-zh, etc.)
     :return: a list of string results about the weather (in the "body" part of the search)
     '''
     # Get the today's weather, especially emphasizing the date
