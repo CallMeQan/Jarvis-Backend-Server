@@ -10,8 +10,8 @@ class Config:
 
     SECRET_KEY = getenv("SECRET_KEY", "default")
     JWT_SECRET_KEY = getenv("JWT_SECRET_KEY", "jwt-secret")
-    JWT_ACCESS_TOKEN_EXPIRES = int(getenv("JWT_ACCESS_TOKEN_EXPIRES", 900))
-    JWT_REFRESH_TOKEN_EXPIRES = int(getenv("JWT_REFRESH_TOKEN_EXPIRES", 86400))
+    # JWT_ACCESS_TOKEN_EXPIRES = int(getenv("JWT_ACCESS_TOKEN_EXPIRES", 900))
+    # JWT_REFRESH_TOKEN_EXPIRES = int(getenv("JWT_REFRESH_TOKEN_EXPIRES", 86400))
     
     # Mail config
     MAIL_SERVER = getenv("MAIL_SERVER")

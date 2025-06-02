@@ -35,7 +35,7 @@ llm_model = None
 
 def respond(
     message: str,
-    history: List[Tuple[str, str]],
+    history: List[Tuple[str, str]] = [],
     model: str = "gemma-3-1b-it-Q8_0.gguf",
     system_message: str = original_prompt,
     max_tokens: int = 1024,
@@ -79,7 +79,6 @@ def respond(
         # Load the model
         if llm is None or llm_model != model:
             # Check if model file exists
-            # model_path = f".../llm_models/{model}"
             model_path = os.path.join("app/llm_models", model)
             model_path = os.path.abspath(model_path)
             
