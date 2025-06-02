@@ -32,7 +32,7 @@ def gemma3():
                     context += f"\n## Function: {result['function']}\n"
                     context += result['return_value']
             else:
-                context = "Error in parsing JSON."
+                context = "No context - There is an error in parsing JSON."
 
             # Models
             prompt = agent_output_format.format(context = context, user_input = message)
