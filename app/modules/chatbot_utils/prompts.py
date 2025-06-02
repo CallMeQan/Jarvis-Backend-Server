@@ -11,7 +11,7 @@ Use the following search and Wikipedia context to answer the user’s question:
 
 # User question: {user_input}
 '''
-agent_system_prompt = "You are a Chat Assistant called Jarvis that can base on the information given to answer the user's query. When information is unrelevant, say 'We cannot find the relevant information' and ask for clearer instruction."
+agent_system_prompt = "You are a Chat Assistant called Jarvis that can base on the information given to answer the user's query."
 
 # Prompt for processing Bluetooth message
 bluetooth_prompt = """**Act as the processor of Bluetooth command.**

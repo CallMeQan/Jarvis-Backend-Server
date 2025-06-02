@@ -44,6 +44,7 @@ def gemma3():
                 }), 200
         except:
             return jsonify({
-                "message": "There was some error in the Gemma 3 Chatbot (Sever-side error)."
-            }), 500
+                "message": "There was some error in the Gemma 3 Chatbot (Sever-side error).",
+                "role": "assistant"
+            }), 200
     return jsonify({"error": "Wrong method! This URL is only for POST method"}), 404

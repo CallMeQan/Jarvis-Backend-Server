@@ -7,7 +7,7 @@ from llama_cpp_agent import MessagesFormatterType
 from llama_cpp import Llama
 
 import os
-from app.modules.agent_tool import search_func, weather_func, wikipedia_func, gmail_func
+from app.modules.agent_tool.tools import search_func, weather_func, wikipedia_func, gmail_func
 from app.modules.chatbot_utils import respond
 
 # Get model instance
