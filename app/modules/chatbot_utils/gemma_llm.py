@@ -1,4 +1,5 @@
 # Importing required libraries
+import os
 from typing import List, Tuple
 from llama_cpp import Llama
 from llama_cpp_agent import LlamaCppAgent
@@ -6,6 +7,8 @@ from llama_cpp_agent.providers import LlamaCppPythonProvider
 from llama_cpp_agent.chat_history import BasicChatHistory
 from llama_cpp_agent.chat_history.messages import Roles
 from llama_cpp_agent.messages_formatter import MessagesFormatter, PromptMarkers
+
+from .prompts import original_prompt
 
 # Define the prompt markers for Gemma 3
 model = "gemma-3-1b-it-Q8_0.gguf"
@@ -32,9 +35,9 @@ llm_model = None
 
 def respond(
     message: str,
-    history: List[Tuple[str, str]],
+    history: List[Tuple[str, str]] = [],
     model: str = "gemma-3-1b-it-Q8_0.gguf",
-    system_message: str = "You are a helpful mobile assistant called Quan.",
+    system_message: str = original_prompt,
     max_tokens: int = 1024,
     temperature: float = 0.7,
     
@@ -61,6 +64,10 @@ def respond(
         str: The response to the message.
     """
     try:
+        pass
+    except:
+        pass
+    if True:
         # Load the global variables
         global llm
         global llm_model
@@ -72,7 +79,8 @@ def respond(
         # Load the model
         if llm is None or llm_model != model:
             # Check if model file exists
-            model_path = f".../llm_models/{model}"
+            model_path = os.path.join("app/llm_models", model)
+            model_path = os.path.abspath(model_path)
             
             # if not os.path.exists(model_path):
             #     yield f"Error: Model file not found at {model_path}. Please check your model path."
@@ -116,7 +124,7 @@ def respond(
             assistant = {"role": Roles.assistant, "content": msn[1]}
             messages.add_message(user)
             messages.add_message(assistant)
-        current_message = {"role": Roles.assistant, "content": message}
+        current_message = {"role": Roles.user, "content": message}
         messages.add_message(current_message)
 
         if not stream:
@@ -147,8 +155,8 @@ def respond(
             return _streaming()
 
     # Handle exceptions that may occur during the process
-    except Exception as e:
-        raise Exception(f"An error occurred: {str(e)}") from e
+    # except Exception as e:
+    #     raise Exception(f"An error occurred: {str(e)}") from e
 
 if __name__ == "__main__":
     # Original history

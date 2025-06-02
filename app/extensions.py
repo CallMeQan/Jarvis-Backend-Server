@@ -3,6 +3,9 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_jwt_extended import JWTManager
 from flask_mail import Mail
 
+# Init function calling LLM
+from .modules.agent_tool.func_call_llm import llm, provider, func_list, output_settings, llama_cpp_agent
+
 db = SQLAlchemy()
 jwt = JWTManager()
 mail = Mail()
