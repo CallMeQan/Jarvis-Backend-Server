@@ -6,12 +6,11 @@ from llama_cpp_agent import LlamaCppAgent
 from llama_cpp_agent.providers import LlamaCppPythonProvider
 from llama_cpp_agent.chat_history import BasicChatHistory
 from llama_cpp_agent.chat_history.messages import Roles
-from llama_cpp_agent.messages_formatter import MessagesFormatter, PromptMarkers
+from llama_cpp_agent.messages_formatter import MessagesFormatter, PromptMarkers, llama_3_formatter
 
 from .prompts import original_prompt
 
 # Define the prompt markers for Gemma 3
-model = "gemma-3-1b-it-Q8_0.gguf"
 gemma_3_prompt_markers = {
     Roles.system: PromptMarkers("", "\n"),  # System prompt should be included within user message
     Roles.user: PromptMarkers("<start_of_turn>user\n", "<end_of_turn>\n"),
@@ -64,10 +63,6 @@ def respond(
         str: The response to the message.
     """
     try:
-        pass
-    except:
-        pass
-    if True:
         # Load the global variables
         global llm
         global llm_model
@@ -78,13 +73,19 @@ def respond(
 
         # Load the model
         if llm is None or llm_model != model:
-            # Check if model file exists
+            # Get model
+            '''
+            In this case:
+                - model is the string name.
+                - llm is a Llama class instance
+                - llm_model is the string name of the recent llm instance
+            Hence:
+                - If llm is None (no instance) --> get the instance of model
+                - If llm_model isn't new model --> get the instance of new model
+                - Else, skip --> use the current instance of model
+            '''
             model_path = os.path.join("app/llm_models", model)
             model_path = os.path.abspath(model_path)
-            
-            # if not os.path.exists(model_path):
-            #     yield f"Error: Model file not found at {model_path}. Please check your model path."
-            #     return
 
             llm = Llama(
                 model_path=model_path,
@@ -100,12 +101,21 @@ def respond(
         provider = LlamaCppPythonProvider(llm)
 
         # Create the agent
-        agent = LlamaCppAgent(
-            provider,
-            system_prompt = f"{system_message}",
-            custom_messages_formatter = gemma_3_formatter,
-            debug_output = False,
-        )
+        if model == "gemma-3-1b-it-Q8_0.gguf":
+            agent = LlamaCppAgent(
+                provider,
+                system_prompt = system_message,
+                custom_messages_formatter = gemma_3_formatter,
+                debug_output = False,
+            )
+        else:
+            # Get Llama agent
+            agent = LlamaCppAgent(
+                provider,
+                system_prompt = system_message,
+                custom_messages_formatter = llama_3_formatter,
+                debug_output = False,
+            )
 
         # Set the settings like temperature, top-k, top-p, max tokens, etc.
         settings = provider.get_provider_default_settings()
@@ -116,9 +126,8 @@ def respond(
         settings.repeat_penalty = repeat_penalty
         settings.stream = stream # If does not have this weird and unnecessary looking line, the whole thing breaks
 
-        messages = BasicChatHistory()
-
         # Add the chat history
+        messages = BasicChatHistory()
         for msn in history:
             user = {"role": Roles.user, "content": msn[0]}
             assistant = {"role": Roles.assistant, "content": msn[1]}
@@ -155,8 +164,8 @@ def respond(
             return _streaming()
 
     # Handle exceptions that may occur during the process
-    # except Exception as e:
-    #     raise Exception(f"An error occurred: {str(e)}") from e
+    except Exception as e:
+        return f"An error happens in Chatbot: {str(e)}"
 
 if __name__ == "__main__":
     # Original history
