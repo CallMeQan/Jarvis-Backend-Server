@@ -12,7 +12,6 @@ from ..extensions import db, jwt
 
 auth_bp = Blueprint('auth', __name__)
 
-
 def generate_email_hash(email: str) -> str:
     """
     Generate a hash for email using HMAC with SHA256.
