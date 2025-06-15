@@ -1,12 +1,21 @@
 # app.py
+import os
 from flask import Flask
 
 from .routes import auth_bp, chatbot_bp
+from .modules.chatbot_utils.install_utils import install_models
 
 from .config import Config
 from .extensions import db
 
 def create_app_with_blueprint():
+    # ======================
+    # |   Installing LLM   |
+    # ======================
+    if not os.getenv("MODEL_INSTALLED"):
+        install_models()
+        os.environ["MODEL_INSTALLED"] = "true"
+
     # ======================
     # |    Configuration   |
     # ======================
