@@ -22,7 +22,8 @@ def send_email(subject: str, content: str, receiver_email: str,
 
     # If server send it
     if is_server:
-        password = getenv("PASSWORD_OF_EMAIL")  # Use the App Password here
+        password = getenv("MAIL_PASSWORD")  # Use the App Password here
+        print(password)
 
     # Create a secure SSL context
     context = ssl.create_default_context()
