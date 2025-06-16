@@ -6,9 +6,10 @@ from llama_cpp_agent import LlamaCppAgent
 from llama_cpp_agent.providers import LlamaCppPythonProvider
 from llama_cpp_agent.chat_history import BasicChatHistory
 from llama_cpp_agent.chat_history.messages import Roles
-from llama_cpp_agent.messages_formatter import MessagesFormatter, PromptMarkers, llama_3_formatter
+from llama_cpp_agent.messages_formatter import MessagesFormatter, MessagesFormatterType, PromptMarkers, llama_3_formatter
 
 from .prompts import original_prompt
+from ..agent_tool.func_call_llm import *
 
 # Define the prompt markers for Gemma 3
 gemma_3_prompt_markers = {
@@ -36,6 +37,7 @@ def respond(
     message: str,
     history: List[Tuple[str, str]] = [],
     model: str = "gemma-3-1b-it-Q8_0.gguf",
+    use_func_call: bool = False,
     system_message: str = original_prompt,
     max_tokens: int = 1024,
     temperature: float = 0.7,
@@ -91,10 +93,11 @@ def respond(
                 model_path=model_path,
                 flash_attn=False,
                 n_gpu_layers=0,
-                n_batch=8,
-                n_ctx=2048,
+                n_batch=64,
+                n_ctx=8192,
                 n_threads=8,
                 n_threads_batch=8,
+                verbose=False, # Disabling debug output
             )
             llm_model = model
 
@@ -107,6 +110,14 @@ def respond(
                 system_prompt = system_message,
                 custom_messages_formatter = gemma_3_formatter,
                 debug_output = False,
+            )
+        elif model == "Llama-3.2-1B-Instruct-Q8_0.gguf": # Model used for function calling
+            # Create a LlamaCppAgent instance as before, including a system message with information about the tools available for the LLM agent.
+            agent = LlamaCppAgent(
+                provider,
+                debug_output=True,
+                system_prompt=f"You are an advanced AI, tasked to assist the user by calling functions in JSON format.",
+                predefined_messages_formatter_type=MessagesFormatterType.CHATML,
             )
         else:
             # Get Llama agent
@@ -127,41 +138,45 @@ def respond(
         settings.stream = stream # If does not have this weird and unnecessary looking line, the whole thing breaks
 
         # Add the chat history
-        messages = BasicChatHistory()
-        for msn in history:
-            user = {"role": Roles.user, "content": msn[0]}
-            assistant = {"role": Roles.assistant, "content": msn[1]}
-            messages.add_message(user)
-            messages.add_message(assistant)
-        current_message = {"role": Roles.user, "content": message}
-        messages.add_message(current_message)
-
-        if not stream:
-            # Non-streaming path: get a single dict back, extract text
-            text = agent.get_chat_response(
-                message,
-                role="assistant",
-                llm_sampling_settings=settings,
-                chat_history=messages,
-                returns_streaming_generator=False,
-                add_response_to_chat_history=True,
-            )
-            
-            return text
-
-        # Streaming helper generator:
+        if use_func_call:
+            results = agent.get_chat_response(message, structured_output_settings = output_settings)
+            return results
         else:
-            def _streaming():
-                for chunk in agent.get_chat_response(
+            messages = BasicChatHistory()
+            for msn in history:
+                user = {"role": Roles.user, "content": msn[0]}
+                assistant = {"role": Roles.assistant, "content": msn[1]}
+                messages.add_message(user)
+                messages.add_message(assistant)
+            current_message = {"role": Roles.user, "content": message}
+            messages.add_message(current_message)
+
+            if not stream:
+                # Non-streaming path: get a single dict back, extract text
+                text = agent.get_chat_response(
                     message,
                     role="assistant",
                     llm_sampling_settings=settings,
                     chat_history=messages,
-                    returns_streaming_generator=True,
-                ):
-                    yield chunk # function stream_results() receive: out_stream["choices"][0]["text"] {"choices": [{"text": chunk}]}
+                    returns_streaming_generator=False,
+                    add_response_to_chat_history=True,
+                )
+                
+                return text
 
-            return _streaming()
+            # Streaming helper generator:
+            else:
+                def _streaming():
+                    for chunk in agent.get_chat_response(
+                        message,
+                        role="assistant",
+                        llm_sampling_settings=settings,
+                        chat_history=messages,
+                        returns_streaming_generator=True,
+                    ):
+                        yield chunk # function stream_results() receive: out_stream["choices"][0]["text"] {"choices": [{"text": chunk}]}
+
+                return _streaming()
 
     # Handle exceptions that may occur during the process
     except Exception as e:

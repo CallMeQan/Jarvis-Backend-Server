@@ -6,11 +6,11 @@ import hmac, hashlib, datetime
 from os import getenv
 import datetime
 
-from ..models import User, ForgotPassword, WrongPassword
-from ..extensions import db, jwt, mail
+from ..models import User, ForgotPassword
+from ..modules.agent_tool.gmail_tool import send_email
+from ..extensions import db, jwt
 
 auth_bp = Blueprint('auth', __name__)
-
 
 def generate_email_hash(email: str) -> str:
     """
@@ -59,12 +59,9 @@ def register():
     db.session.commit()
     
     verify_link = f"http://localhost:5000/auth/register/verify-email?token={verify_token}"
-    msg = Message(
-        subject="Verify your email",
-        recipients=[email],
-        body=f"Please click the link to verify your email: {verify_link}"
-    )
-    mail.send(msg)
+    body=f"Please click the link to verify your email: {verify_link}"
+    send_email(subject = "Verify your email", content = body,
+               receiver_email = email, is_server = True)
     
     access_token = create_access_token(identity=new_user.user_id)
 

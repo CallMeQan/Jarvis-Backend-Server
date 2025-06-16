@@ -5,8 +5,8 @@ import smtplib, ssl
 MAIL_SERVER = getenv("MAIL_SERVER")
 MAIL_PORT = getenv("MAIL_PORT")
 
-def send_email(subject: str, content: str, sender_email: str,
-               receiver_email: str, password: str) -> str:
+def send_email(subject: str, content: str, receiver_email: str,
+               sender_email: str = "fuishere.ha.ha.ha@gmail.com", password: str = None, is_server: bool = False) -> str:
     """
     Function to send email to an account to restore it.
 
@@ -18,11 +18,13 @@ def send_email(subject: str, content: str, sender_email: str,
     """
 
     # Email content
-    message = f"""\
-Subject: {subject}
+    message = f"""Subject: {subject}\n\n{content}"""
 
-{content}
-"""
+    # If server send it
+    if is_server:
+        sender_email = getenv("MAIL_USERNAME")
+        password = getenv("MAIL_PASSWORD")  # Use the App Password here
+        print(password)
 
     # Create a secure SSL context
     context = ssl.create_default_context()

@@ -1,10 +1,41 @@
 from ..modules.chatbot_utils import respond, agent_output_format, agent_system_prompt, bluetooth_prompt
-from ..modules.agent_tool.func_call_llm import *
 
 from flask import Blueprint, request, jsonify
 import json
 
 chatbot_bp = Blueprint('chatbot', __name__)
+
+# Only a simple chatbot
+@chatbot_bp.route("/vanilla", methods = ["GET", "POST"])
+def vanilla():
+    """
+    POST message and chat session log to Server to process using a Gemma 3 chatbot model.\n
+    The data shall be in this format: {"message": str, "history": [[message, answer], [message, answer], ...]}.\n
+    If everything goes well, the function will send a JSON in format: {"answer": str, "role": str}, 200.\n
+    """
+    if request.method == "POST":
+        # Catch error:
+        try:
+            # Get data
+            data = request.get_json()
+            message = data.get("message")
+            # history = data.get("history")
+            history = []
+
+            # Pass the user input together with output settings to get_chat_response method.
+            answer = respond(message, hisory = history)
+
+            return jsonify({
+                "message": answer,
+                "role": "assistant",
+                }), 200
+        
+        except:
+            return jsonify({
+                "message": "There was some error in the Gemma 3 Chatbot (Sever-side error).",
+                "role": "assistant"
+            }), 200
+    return jsonify({"error": "Wrong method! This URL is only for POST method"}), 404
 
 # function_call_chatbot
 @chatbot_bp.route("/function_call_chatbot", methods = ["GET", "POST"])
@@ -24,7 +55,7 @@ def function_call_chatbot():
             history = []
 
             # Pass the user input together with output settings to get_chat_response method.
-            results = llama_cpp_agent.get_chat_response(message, structured_output_settings=output_settings)
+            results = respond(message, use_func_call=True)
 
             # Get context from function calling
             if type(results) is not str: # To avoid error when the model fail to parse the JSON
@@ -50,7 +81,7 @@ def function_call_chatbot():
             }), 200
     return jsonify({"error": "Wrong method! This URL is only for POST method"}), 404
 
-# Bluetooth processor using Llama 3.2 1B Instruct
+# Bluetooth processor using Llama 3.2 1B Instruct finetuned with GRPO
 @chatbot_bp.route("/bluetooth_processor", methods = ["GET", "POST"])
 def bluetooth_processor():
     """
