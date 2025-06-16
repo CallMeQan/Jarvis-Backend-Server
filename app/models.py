@@ -1,7 +1,7 @@
 import datetime
 from sqlalchemy import func, or_, and_, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column
-from extensions import db
+from app.extensions import db
 from flask_login import UserMixin
 
 class User(db.Model, UserMixin):
