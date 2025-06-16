@@ -23,16 +23,16 @@ def vanilla():
             history = []
 
             # Pass the user input together with output settings to get_chat_response method.
-            answer = respond(message, hisory = history)
+            answer = respond(message, history = history)
 
             return jsonify({
                 "message": answer,
                 "role": "assistant",
                 }), 200
-        
-        except:
+
+        except Exception as e:
             return jsonify({
-                "message": "There was some error in the Gemma 3 Chatbot (Sever-side error).",
+                "message": f"There was some error in the Gemma 3 Chatbot (Sever-side error).: {e}",
                 "role": "assistant"
             }), 200
     return jsonify({"error": "Wrong method! This URL is only for POST method"}), 404
@@ -104,7 +104,7 @@ def bluetooth_processor():
                     commands = respond(message = message, history = [], model = "Llama-3.2-1B-Instruct-GRPO-GGUF.gguf", system_message = bluetooth_prompt)
                     commands = json.loads(commands)
                     for command in commands:
-                        answer += f"{command["signal"]},{command["color"]};"
+                        answer += f"{command['signal']},{command['color']};"
                     break
                 except:
                     tries += 1

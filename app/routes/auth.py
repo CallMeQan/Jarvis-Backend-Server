@@ -1,4 +1,4 @@
-from flask import Blueprint, request, session, jsonify
+from flask import Blueprint, request, session, jsonify, current_app
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, create_refresh_token
 from flask_mail import Message
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -6,20 +6,20 @@ import hmac, hashlib, datetime
 from os import getenv
 import datetime
 
-from ..models import User, ForgotPassword
-from ..modules.agent_tool.gmail_tool import send_email
-from ..extensions import db, jwt
+from app.models import User, ForgotPassword, WrongPassword
+from app.extensions import db, jwt, mail
 
 auth_bp = Blueprint('auth', __name__)
+
 
 def generate_email_hash(email: str) -> str:
     """
     Generate a hash for email using HMAC with SHA256.
     This is reversible so it's good as an alternative to B-Crypt to store email.
     """
-    secret = getenv("SECRET_KEY")
+    secret = current_app.config.get("SECRET_KEY")
     if not secret:
-        raise ValueError("SECRET_KEY environment variable not set")
+        raise ValueError("SECRET_KEY config not set")
     hashed_email = hmac.new(secret.encode(), str(email).encode(), hashlib.sha256)
     return hashed_email.hexdigest()
 
@@ -59,11 +59,14 @@ def register():
     db.session.commit()
     
     verify_link = f"http://localhost:5000/auth/register/verify-email?token={verify_token}"
-    body=f"Please click the link to verify your email: {verify_link}"
-    send_email(subject = "Verify your email", content = body,
-               receiver_email = email, is_server = True)
+    msg = Message(
+        subject="Verify your email",
+        recipients=[email],
+        body=f"Please click the link to verify your email: {verify_link}"
+    )
+    mail.send(msg)
     
-    access_token = create_access_token(identity=new_user.user_id)
+    access_token = create_access_token(identity=str(new_user.user_id))
 
     return jsonify({
         "msg": "User registered successfully. Please verify your email.",
@@ -101,8 +104,8 @@ def login():
     if not user or not check_password_hash(user.password, password):
         return jsonify({"msg": "Invalid credentials"}), 401
 
-    access_token = create_access_token(identity=user.user_id)
-    refresh_token = create_refresh_token(identity=user.user_id)
+    access_token = create_access_token(identity=str(user.user_id))
+    refresh_token = create_refresh_token(identity=str(user.user_id))
     return jsonify(access_token=access_token, refresh_token=refresh_token)
 
 # lấy dữ liệu người dùng 
@@ -113,7 +116,7 @@ def profile():
     Get user profile.
     """
     user_id = get_jwt_identity()
-    user = User.query.get(user_id)
+    user = db.session.get(User, user_id)
     return jsonify({
         "username": user.username,
         "email": user.email,
@@ -127,7 +130,7 @@ def profile():
 @jwt_required(refresh = True)
 def refresh():
     identity = get_jwt_identity()
-    access_token = create_access_token(identity=identity)
+    access_token = create_access_token(identity=str(identity))
     return jsonify(access_token=access_token)
 
 @auth_bp.route("/forgot-password", methods=["POST"])

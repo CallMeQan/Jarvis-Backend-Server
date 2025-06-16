@@ -6,9 +6,9 @@ from .routes import auth_bp, chatbot_bp
 from .modules.chatbot_utils.install_utils import install_models
 
 from .config import Config
-from .extensions import db
+from .extensions import db, mail, jwt
 
-def create_app_with_blueprint():
+def create_app_with_blueprint(config_override = None):
     # ======================
     # |   Installing LLM   |
     # ======================
@@ -20,11 +20,14 @@ def create_app_with_blueprint():
     # |    Configuration   |
     # ======================
     app = Flask(__name__, static_folder="static")
-    app.config.from_object(__name__)
     app.config.from_object(Config)
+    if config_override:
+        app.config.update(config_override)
 
     # Initialize extensions
     db.init_app(app)
+    mail.init_app(app)
+    jwt.init_app(app)
 
     # ======================
     # |     Routing        |

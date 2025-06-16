@@ -1,12 +1,12 @@
 import datetime
 from sqlalchemy import func, or_, and_, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column
-from .extensions import db
+from app.extensions import db
 from flask_login import UserMixin
 
 class User(db.Model, UserMixin):
     __tablename__ = 'users'
-    user_id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    user_id: Mapped[int] = mapped_column(primary_key=True)
     username: Mapped[str] = mapped_column(unique=True, nullable=False)
     email: Mapped[str] = mapped_column(unique=True, nullable=False)
     password: Mapped[str] = mapped_column(nullable=False)
