@@ -23,16 +23,16 @@ def vanilla():
             history = []
 
             # Pass the user input together with output settings to get_chat_response method.
-            answer = respond(message, hisory = history)
+            answer = respond(message, history = history)
 
             return jsonify({
                 "message": answer,
                 "role": "assistant",
                 }), 200
 
-        except:
+        except Exception as e:
             return jsonify({
-                "message": "There was some error in the Gemma 3 Chatbot (Sever-side error).",
+                "message": f"There was some error in the Gemma 3 Chatbot (Sever-side error).: {e}",
                 "role": "assistant"
             }), 200
     return jsonify({"error": "Wrong method! This URL is only for POST method"}), 404
