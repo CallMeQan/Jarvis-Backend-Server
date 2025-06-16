@@ -184,7 +184,7 @@ def respond(
 
 if __name__ == "__main__":
     # Original history
-    history = [("Hello, introduce yourself!", "Umm... hi! I’m… well, I’m a little shy. It's nice to meet you! I like naps and tuna… and maybe a gentle head scratch?  Do you have any treats? 🥺"),]
+    history = [("Hello, introduce yourself!", "Umm... hi! Iâ€™mâ€¦ well, Iâ€™m a little shy. It's nice to meet you! I like naps and tunaâ€¦ and maybe a gentle head scratch?  Do you have any treats? ðŸ¥º"),]
     
     # Demo message and answer
     message = "No. I don't have treat. But what is 1 + 1?"
