@@ -22,6 +22,7 @@ def send_email(subject: str, content: str, receiver_email: str,
 
     # If server send it
     if is_server:
+        sender_email = getenv("MAIL_USERNAME")
         password = getenv("MAIL_PASSWORD")  # Use the App Password here
         print(password)
 

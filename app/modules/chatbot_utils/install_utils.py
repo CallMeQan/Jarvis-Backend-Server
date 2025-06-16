@@ -4,7 +4,6 @@ from huggingface_hub import hf_hub_download
 def install_models():
     # Define model directories
     MODEL_DIR = os.path.join('app', r'llm_models')
-    MODEL_DIR = os.path.abspath(MODEL_DIR)
     os.makedirs(MODEL_DIR, exist_ok=True)
     print(MODEL_DIR)
 
