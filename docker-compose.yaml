@@ -20,8 +20,8 @@ services:
       POSTGRES_PASSWORD: ${DATABASE_PASS}
       POSTGRES_DB: ${DATABASE_NAME}
     volumes:
-      - ./init.sql:/docker-entrypoint-initdb.d/schema.sql
-      - db-data:/docker-entrypoint-initdb.d/mock_data.sql
+      - ./schema.sql:/docker-entrypoint-initdb.d/schema.sql
+      - ./mock_data.sql:/docker-entrypoint-initdb.d/mock_data.sql
     ports:
       - "5432:5432"
     healthcheck:
