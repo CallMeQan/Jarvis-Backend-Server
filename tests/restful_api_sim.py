@@ -34,7 +34,7 @@ if __name__ == "__main__":
     url_send_data = root + "/auth/register"
 
     data = {
-        "message": "Turn every light on sequentially",
+        "message": "Please turn on only yellow lights, then off green, but later blink only red. Then blink all",
         "history": [],
     }
     data = {
