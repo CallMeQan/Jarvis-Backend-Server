@@ -103,6 +103,8 @@ def login():
     user = User.query.filter_by(email=email).first()
     if not user or not check_password_hash(user.password, password):
         return jsonify({"msg": "Invalid credentials"}), 401
+    if not user.is_verified:
+        return jsonify({"msg": "Email not verified"}), 403
 
     access_token = create_access_token(identity=str(user.user_id))
     refresh_token = create_refresh_token(identity=str(user.user_id))
@@ -158,19 +160,15 @@ def forgot_password():
 
     return jsonify({"msg": "Reset link sent to your email (mock)"}), 200
 
-@auth_bp.route("/recover-password?a=<token>", methods = ["POST"])
-def recover_password(token):
-    """
-    Recover password function.
-    This function is used to recover the user's password.
-    The function takes a token as an argument, which is used to verify the user's identity.
-    """
+# Fix recover-password endpoint to accept token as query param or in body
+@auth_bp.route("/recover-password", methods=["POST"])
+def recover_password():
     data = request.json
-    token = data.get("token")
+    token = data.get("token") or request.args.get("a")
     new_password = data.get("new_password")
     confirm_password = data.get("confirm_password")
 
-    if not all(token, new_password, confirm_password):
+    if not all([token, new_password, confirm_password]):
         return jsonify({"msg": "Missing fields"}), 400
     if new_password != confirm_password:
         return jsonify({"msg": "Passwords do not match"}), 400
