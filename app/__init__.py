@@ -33,7 +33,7 @@ def create_app_with_blueprint(config_override = None):
     # |     Routing        |
     # ======================
 
-    app.register_blueprint(auth_bp, url_prefix="/auth")
+    # app.register_blueprint(auth_bp, url_prefix="/auth")
     app.register_blueprint(chatbot_bp, url_prefix="/chatbot")
 
     # ======================
