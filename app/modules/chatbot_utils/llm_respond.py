@@ -8,7 +8,7 @@ from llama_cpp_agent.chat_history import BasicChatHistory
 from llama_cpp_agent.chat_history.messages import Roles
 from llama_cpp_agent.messages_formatter import MessagesFormatter, MessagesFormatterType, PromptMarkers, llama_3_formatter
 
-from .prompts import original_prompt
+from .prompts import original_prompt, agent_system_prompt
 from ..agent_tool.func_call_llm import *
 
 # Define the prompt markers for Gemma 3
@@ -97,7 +97,7 @@ def respond(
                 n_ctx=8192,
                 n_threads=8,
                 n_threads_batch=8,
-                verbose=False, # Disabling debug output
+                verbose=True, # Disabling debug output
             )
             llm_model = model
 
@@ -116,7 +116,7 @@ def respond(
             agent = LlamaCppAgent(
                 provider,
                 debug_output=True,
-                system_prompt=f"You are an advanced AI, tasked to assist the user by calling functions in JSON format.",
+                system_prompt=agent_system_prompt,
                 predefined_messages_formatter_type=MessagesFormatterType.CHATML,
             )
         else:

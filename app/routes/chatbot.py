@@ -107,6 +107,7 @@ def bluetooth_processor():
                         answer += f"{command['signal']},{command['color']};"
                     break
                 except:
+                    # Trying 3 times, if fail, the return this
                     tries += 1
                     if tries == 3:
                         return jsonify({
