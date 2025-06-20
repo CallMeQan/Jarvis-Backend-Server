@@ -4,10 +4,10 @@ from .gmail_tool import send_email
 
 def search_func(search_query: str):
     """
-    Search news on DuckDuckGo.
+    Search information on the Internet.
     
     Args:
-        search_query (str): News we want to search.
+        search_query (str): Information we want to search.
 
     Returns:
         str: The search results of the query.
@@ -22,6 +22,7 @@ def search_func(search_query: str):
         context = ""
     return context
 
+# Currently on development
 def price_func(search_query: str):
     """
     """
@@ -48,7 +49,6 @@ def weather_func(place: str):
     Args:
         place (str): the place.
 
-
     Returns:
         str: The weather of place.
     """
@@ -62,21 +62,20 @@ def weather_func(place: str):
         context = ""
     return context
 
-def wikipedia_func(query: str, language: str = "en"):
+def wikipedia_func(query: str):
     """
     Look up knowledge and theory on Wikipedia.
     
     Args:
         query (str): Theory and knowledge.
-        language (str): If user asks in Vietnamese, input "vi"; else input anything else
 
     Returns:
         str: The search result of the query.
     """
-    language = "vi" if language == "vi" else "en"
-    context = "Wikipedia information: " + get_wiki_first_paragraph(query, language)
+    context = "Wikipedia information: " + get_wiki_first_paragraph(query)
     return context
 
+# Gmail function - currently unavailable because of model's bad JSON parsing
 def gmail_func(subject: str, content: str, sender_email: str, receiver_email: str, password: str) -> str:
     """
     Send email to user.

@@ -52,7 +52,7 @@ def get_wiki_short_text(query: str, language: str = "en") -> str:
 
     return f"{query}: {answer}"
 
-def get_wiki_first_paragraph(query: str, language: str = "en") -> str:
+def get_wiki_first_paragraph(query: str) -> str:
     '''
     A function that search for a term on Wikipedia and return either the first
     paragraph or a short description of that page.
@@ -62,6 +62,9 @@ def get_wiki_first_paragraph(query: str, language: str = "en") -> str:
     :identity: used in header information in request to MediaWiki REST API
     :return: the first paragraph of the Wikipedia page or the short description
     '''
+    # Set language
+    language: str = "en"
+
     # Send a GET request to the API
     response = search_wiki(query = query, language = language)
 

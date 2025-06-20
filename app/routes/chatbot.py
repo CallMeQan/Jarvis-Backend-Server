@@ -1,5 +1,5 @@
 from ..modules.chatbot_utils import respond, agent_output_format, agent_system_prompt, bluetooth_prompt
-
+from ..modules.agent_tool.bluetooth_command import add_only_flags
 from flask import Blueprint, request, jsonify
 import json
 
@@ -74,9 +74,9 @@ def function_call_chatbot():
                 "message": answer,
                 "role": "assistant",
                 }), 200
-        except:
+        except Exception as e:
             return jsonify({
-                "message": "There was some error in the Gemma 3 Chatbot (Sever-side error).",
+                "message": "There was some error in the Gemma 3 Chatbot (Sever-side error): {e}",
                 "role": "assistant"
             }), 200
     return jsonify({"error": "Wrong method! This URL is only for POST method"}), 404
@@ -96,7 +96,7 @@ def bluetooth_processor():
             data = request.get_json()
             message = data.get("message")
 
-            # Loop that let model try x times
+            # Loop that let model try 3 times
             tries = 0
             while True:
                 try:
@@ -105,12 +105,14 @@ def bluetooth_processor():
                     commands = json.loads(commands)
                     for command in commands:
                         answer += f"{command['signal']},{command['color']};"
+                    answer = add_only_flags(message, command_string = answer,
+                                            colors = ["red", "green", "yellow"])
                     break
-                except:
+                except Exception as e:
                     tries += 1
                     if tries == 3:
                         return jsonify({
-                            "message": "Failed to get the command!",
+                            "message": f"Failed to get the command: {e}",
                             "role": "assistant"
                         }), 200
             return jsonify({
@@ -119,7 +121,7 @@ def bluetooth_processor():
                 }), 200
         except:
             return jsonify({
-                "message": "There was some error in the Bluetooth processor (Sever-side error).",
+                "message": f"There was some error in the Bluetooth processor (Sever-side error): {e}",
                 "role": "assistant"
             }), 200
     return jsonify({"error": "Wrong method! This URL is only for POST method"}), 404
